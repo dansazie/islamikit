@@ -9,7 +9,16 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->string('locale', 2)->nullable()->after('avatar');
+            $table->string('phone')->nullable();
+            $table->string('avatar')->nullable();
+            $table->string('locale', 2)->nullable();
+        });
+    }
+
+    public function down(): void
+    {
+        Schema::table('users', function (Blueprint $table) {
+            $table->dropColumn(['phone', 'avatar', 'locale']);
         });
     }
 };

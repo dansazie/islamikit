@@ -62,9 +62,4 @@ return [
         'source' => __DIR__ . '/resources/js/Pages',
     ],
 
-    // Seeders
-    'starterkit-seeders' => [
-        'path' => database_path('seeders/Starterkit'),
-        'source' => __DIR__ . '/database/seeders',
-    ],
 ];

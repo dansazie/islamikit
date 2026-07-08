@@ -51,7 +51,7 @@ class InstallCommand extends Command
         $this->publish('starterkit-pages', $force, '📄 Pages');
 
         // 8. Publish Seeders
-        $this->publish('starterkit-seeders', $force, '🌱 Seeders');
+       // $this->publish('starterkit-seeders', $force, '🌱 Seeders');
 
         // 9. Update vite.config.js
         $this->updateViteConfig();

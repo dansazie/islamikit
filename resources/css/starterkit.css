@@ -1,0 +1,511 @@
+@import 'tailwindcss';
+@import 'tw-animate-css';
+
+@source "../views/**/*.blade.php";
+@source "../js/**/*.vue";
+@source "../../storage/framework/views/*.php";
+
+/* ─── KONFIGURASI TAILWIND v4 DARK MODE SELECTOR ─── */
+@variant dark (.dark &);
+
+/* ─── TEMA INLINE (Token Semantik) ─── */
+@theme inline {
+    --font-sans:
+        Instrument Sans, ui-sans-serif, system-ui, sans-serif,
+        'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol',
+        'Noto Color Emoji';
+
+    --radius-lg: var(--radius);
+    --radius-md: calc(var(--radius) - 2px);
+    --radius-sm: calc(var(--radius) - 4px);
+
+    --color-background: var(--background);
+    --color-foreground: var(--foreground);
+
+    --color-card: var(--card);
+    --color-card-foreground: var(--card-foreground);
+
+    --color-popover: var(--popover);
+    --color-popover-foreground: var(--popover-foreground);
+
+    --color-primary: var(--primary);
+    --color-primary-foreground: var(--primary-foreground);
+
+    --color-secondary: var(--secondary);
+    --color-secondary-foreground: var(--secondary-foreground);
+
+    --color-tertiary: var(--tertiary);
+    --color-tertiary-foreground: var(--tertiary-foreground);
+
+    --color-muted: var(--muted);
+    --color-muted-foreground: var(--muted-foreground);
+
+    --color-accent: var(--accent);
+    --color-accent-foreground: var(--accent-foreground);
+
+    --color-destructive: var(--destructive);
+    --color-destructive-foreground: var(--destructive-foreground);
+
+    --color-border: var(--border);
+    --color-input: var(--input);
+    --color-ring: var(--ring);
+
+    --color-chart-1: var(--chart-1);
+    --color-chart-2: var(--chart-2);
+    --color-chart-3: var(--chart-3);
+    --color-chart-4: var(--chart-4);
+    --color-chart-5: var(--chart-5);
+
+    --color-sidebar: var(--sidebar-background);
+    --color-sidebar-foreground: var(--sidebar-foreground);
+    --color-sidebar-primary: var(--sidebar-primary);
+    --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+    --color-sidebar-accent: var(--sidebar-accent);
+    --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+    --color-sidebar-border: var(--sidebar-border);
+    --color-sidebar-ring: var(--sidebar-ring);
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOKENS LIGHT MODE
+   ══════════════════════════════════════════════════════════ */
+:root {
+    --background: hsl(210 20% 98%);
+    --foreground: hsl(224 71.4% 4.1%);
+
+    --card: hsl(0 0% 100%);
+    --card-foreground: hsl(224 71.4% 4.1%);
+    --popover: hsl(0 0% 100%);
+    --popover-foreground: hsl(224 71.4% 4.1%);
+
+    --primary: hsl(162 94% 30%);
+    --primary-foreground: hsl(0 0% 100%);
+    --secondary: hsl(35 92% 44%);
+    --secondary-foreground: hsl(0 0% 100%);
+    --tertiary: hsl(243 75% 59%);
+    --tertiary-foreground: hsl(0 0% 100%);
+
+    --muted: hsl(220 14.3% 95.9%);
+    --muted-foreground: hsl(220 8.9% 46.1%);
+    --accent: hsl(162 94% 96%);
+    --accent-foreground: hsl(162 94% 30%);
+    --destructive: hsl(0 84.2% 60.2%);
+    --destructive-foreground: hsl(0 0% 98%);
+
+    --border: hsl(220 13% 91%);
+    --input: hsl(220 13% 89%);
+    --ring: hsl(162 94% 30%);
+
+    --radius: 0.5rem;
+
+    --sidebar-background: hsl(0 0% 100%);
+    --sidebar-foreground: hsl(220 8.9% 26.1%);
+    --sidebar-primary: hsl(162 94% 30%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(162 94% 93%);
+    --sidebar-accent-foreground: hsl(162 94% 20%);
+    --sidebar-border: hsl(220 13% 91%);
+    --sidebar-ring: hsl(162 94% 30%);
+
+    --chart-1: hsl(162 94% 30%);
+    --chart-2: hsl(35 92% 44%);
+    --chart-3: hsl(243 75% 59%);
+    --chart-4: hsl(280 67% 51%);
+    --chart-5: hsl(47 96% 53%);
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOKENS DARK MODE
+   ══════════════════════════════════════════════════════════ */
+.dark {
+    --background: hsl(220 15% 3.5%);
+    --foreground: hsl(210 20% 98%);
+
+    --card: hsl(220 15% 6%);
+    --card-foreground: hsl(210 20% 98%);
+    --popover: hsl(220 15% 8%);
+    --popover-foreground: hsl(210 20% 98%);
+
+    --primary: hsl(162 94% 40%);
+    --primary-foreground: hsl(220 15% 3.5%);
+    --secondary: hsl(35 92% 50%);
+    --secondary-foreground: hsl(220 15% 3.5%);
+    --tertiary: hsl(239 84% 67%);
+    --tertiary-foreground: hsl(220 15% 3.5%);
+
+    --muted: hsl(220 15% 10%);
+    --muted-foreground: hsl(220 10% 65%);
+    --accent: hsl(162 94% 12%);
+    --accent-foreground: hsl(210 20% 98%);
+    --destructive: hsl(0 62.8% 30.6%);
+    --destructive-foreground: hsl(210 20% 98%);
+
+    --border: hsl(220 15% 12%);
+    --input: hsl(220 15% 12%);
+    --ring: hsl(162 94% 40%);
+
+    --sidebar-background: hsl(220 14% 7%);
+    --sidebar-foreground: hsl(210 20% 95%);
+    --sidebar-primary: hsl(162 94% 40%);
+    --sidebar-primary-foreground: hsl(0 0% 100%);
+    --sidebar-accent: hsl(220 14% 12%);
+    --sidebar-accent-foreground: hsl(210 20% 98%);
+    --sidebar-border: hsl(220 14% 15%);
+    --sidebar-ring: hsl(162 94% 40%);
+
+    --chart-1: hsl(162 94% 40%);
+    --chart-2: hsl(35 92% 50%);
+    --chart-3: hsl(239 84% 67%);
+    --chart-4: hsl(280 67% 61%);
+    --chart-5: hsl(47 96% 63%);
+}
+
+/* ══════════════════════════════════════════════════════════
+   BASE LAYER — Responsif Global
+   ══════════════════════════════════════════════════════════ */
+@layer base {
+    *,
+    ::after,
+    ::before,
+    ::backdrop,
+    ::file-selector-button {
+        border-color: var(--color-border, currentColor);
+    }
+
+    html {
+        /* Font base 15px di mobile, 16px di desktop — proporsional */
+        font-size: 15px;
+        scroll-behavior: smooth;
+        -webkit-tap-highlight-color: transparent;
+
+        @media (min-width: 640px) {
+            font-size: 16px;
+        }
+    }
+
+    body {
+        background-color: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* ── Safe Area untuk HP berponi/notch (iPhone X+) ── */
+    @supports (padding: env(safe-area-inset-bottom)) {
+        body {
+            padding-left: env(safe-area-inset-left);
+            padding-right: env(safe-area-inset-right);
+        }
+    }
+
+    /* ── Touch target minimum 44px (hanya perangkat sentuh) ── */
+    @media (pointer: coarse) {
+        button,
+        [type="button"],
+        [type="reset"],
+        [type="submit"],
+        a[class*="flex"],
+        select {
+            min-height: 40px;
+        }
+    }
+
+    /* ── Gambar responsif default ── */
+    img,
+    svg {
+        max-width: 100%;
+        height: auto;
+    }
+
+    /* ── Tabel: biarkan display default, scroll handled oleh wrapper div ── */
+    table {
+        width: 100%;
+        border-collapse: collapse;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   SCROLLBAR — Hanya desktop, hidden di mobile
+   ══════════════════════════════════════════════════════════ */
+@layer utilities {
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 5px;
+        height: 5px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-track {
+        background: transparent;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background: var(--color-border);
+        border-radius: 10px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+        background: var(--color-muted-foreground);
+    }
+
+    /* Di perangkat sentuh / layar kecil, sembunyikan scrollbar kustom */
+    @media (pointer: coarse), (max-width: 767px) {
+        .custom-scrollbar {
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   UTILITY KARTU APLIKASI — Responsif
+   ══════════════════════════════════════════════════════════ */
+@utility app-card-container {
+    background-color: var(--color-card);
+    border: 1px solid var(--color-border);
+    border-radius: 0.75rem;
+    padding: 1rem;
+    box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+    display: grid;
+    gap: 1rem;
+    transition: background-color 0.3s, border-color 0.3s, box-shadow 0.3s;
+
+    @media (min-width: 640px) {
+        border-radius: 1rem;
+        padding: 1.5rem;
+        gap: 1.5rem;
+    }
+}
+
+@utility app-card-header {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding-bottom: 0.75rem;
+    border-bottom: 1px solid var(--color-border);
+
+    @media (min-width: 640px) {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        gap: 1rem;
+        padding-bottom: 1rem;
+    }
+}
+
+@utility app-icon-wrapper {
+    padding: 0.5rem;
+    background-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+    border-radius: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+
+    @media (min-width: 640px) {
+        padding: 0.75rem;
+        border-radius: 0.75rem;
+    }
+}
+
+@utility app-title {
+    font-size: 1rem;
+    font-weight: 900;
+    letter-spacing: -0.025em;
+    color: var(--color-foreground);
+    line-height: 1.3;
+
+    @media (min-width: 640px) {
+        font-size: 1.125rem;
+    }
+}
+
+@utility app-subtitle {
+    font-size: 0.6875rem;
+    color: var(--color-muted-foreground);
+    font-weight: 500;
+    line-height: 1.4;
+
+    @media (min-width: 640px) {
+        font-size: 0.75rem;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   UTILITY TAMBAHAN — Layout & Responsif
+   ══════════════════════════════════════════════════════════ */
+
+/* Batas max-width konten agar tidak terlalu lebar di ultrawide */
+@utility app-content-max {
+    width: 100%;
+    margin-left: auto;
+    margin-right: auto;
+    max-width: 80rem;
+
+    @media (min-width: 1536px) {
+        max-width: 90rem;
+    }
+}
+
+/* Grid kartu responsif: 1 kolom → 2 kolom → 3 kolom */
+@utility app-grid-cards {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 640px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    @media (min-width: 1280px) {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+/* Grid 2 kolom (untuk kartu besar) */
+@utility app-grid-2 {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1rem;
+
+    @media (min-width: 768px) {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+}
+
+/* Utility sembunyikan cetak */
+@utility no-print {
+    @media print {
+        display: none !important;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   MODAL — Bottom Sheet di Mobile (Global CSS)
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 639px) {
+    .modal-portal .modal-backdrop {
+        background: rgba(0, 0, 0, 0.5);
+        backdrop-filter: blur(0px);
+    }
+
+    .modal-portal .modal-wrapper {
+        align-items: flex-end !important;
+        padding: 0 !important;
+        padding-bottom: env(safe-area-inset-bottom, 0) !important;
+    }
+
+    .modal-portal .modal-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        border-radius: 1.25rem 1.25rem 0 0 !important;
+        max-height: 88vh;
+        overflow-y: auto;
+        border-bottom: none !important;
+        border-left: none !important;
+        border-right: none !important;
+        box-shadow: 0 -4px 30px rgba(0, 0, 0, 0.15) !important;
+    }
+
+    /* Handle drag indicator di atas bottom sheet */
+    .modal-portal .modal-content::before {
+        content: '';
+        display: block;
+        width: 2.5rem;
+        height: 0.25rem;
+        background-color: var(--color-border);
+        border-radius: 9999px;
+        margin: 0.75rem auto 0;
+    }
+
+    /* Animasi masuk: slide dari bawah */
+    .modal-portal .modal-content-enter {
+        transform: translateY(100%) !important;
+        opacity: 1 !important;
+    }
+    .modal-portal .modal-content-enter-to {
+        transform: translateY(0) !important;
+        opacity: 1 !important;
+    }
+
+    /* Animasi keluar: slide ke bawah */
+    .modal-portal .modal-content-leave-to {
+        transform: translateY(100%) !important;
+        opacity: 1 !important;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   TOAST — Full Width di Mobile (Global CSS)
+   ══════════════════════════════════════════════════════════ */
+@media (max-width: 639px) {
+    .toast-portal {
+        left: 0.75rem !important;
+        right: 0.75rem !important;
+        bottom: env(safe-area-inset-bottom, 0.75rem) !important;
+        bottom: calc(env(safe-area-inset-bottom, 0px) + 0.75rem) !important;
+        max-width: none !important;
+        width: auto !important;
+    }
+
+    .toast-portal .toast-item {
+        border-radius: 0.75rem !important;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    }
+}
+
+/* ══════════════════════════════════════════════════════════
+   ANIMASI TRANSISI HALAMAN INERTIA
+   ══════════════════════════════════════════════════════════ */
+.page-fade-enter-active,
+.page-fade-leave-active {
+    transition: opacity 0.2s cubic-bezier(0.4, 0, 0.2, 1),
+                transform 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.page-fade-enter-from {
+    opacity: 0;
+    transform: translateY(6px);
+}
+.page-fade-leave-to {
+    opacity: 0;
+    transform: translateY(-6px);
+}
+
+/* ══════════════════════════════════════════════════════════
+   PRINT STYLES
+   ══════════════════════════════════════════════════════════ */
+@media print {
+    body {
+        background: white !important;
+        color: black !important;
+        font-size: 12pt !important;
+    }
+
+    .no-print,
+    aside,
+    header[role="banner"],
+    .toast-portal,
+    .modal-portal {
+        display: none !important;
+    }
+
+    main {
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+
+    .app-card-container {
+        break-inside: avoid;
+        box-shadow: none !important;
+        border: 1px solid #e5e7eb !important;
+    }
+
+    table {
+        width: 100% !important;
+    }
+}
