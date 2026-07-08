@@ -307,6 +307,8 @@ class InstallCommand extends Command
             return;
         }
 
+        File::ensureDirectoryExists(app_path('Http/Middleware'));
+
         // Paksa timpa file bawaan Laravel
         File::copy($sourcePath, $targetPath);
         $this->line('  ✓ HandleInertiaRequests.php updated');
