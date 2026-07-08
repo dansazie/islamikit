@@ -37,8 +37,6 @@ class InstallCommand extends Command
         // 4. Publish CSS
         $this->publish('starterkit-css', $force, '📦 CSS');
 
-        // 5. Publish JS Entry Point (app.js)
-        $this->publish('starterkit-app-js', $force, '⚡ App JS');
 
         // 6. Publish Starterkit JS (Global Component Registration)
         $this->publish('starterkit-js', $force, '🧩 Starterkit JS');
@@ -50,14 +48,13 @@ class InstallCommand extends Command
         $this->publish('starterkit-layouts', $force, '📐 Layouts');
         $this->publish('starterkit-pages', $force, '📄 Pages');
 
-        // 8. Publish Seeders
-       // $this->publish('starterkit-seeders', $force, '🌱 Seeders');
+        // 10. Force overwrite critical files
+        $this->updateAppJs();
+        $this->updateHandleInertiaRequests();
 
         // 9. Update vite.config.js
         $this->updateViteConfig();
 
-        // 11. Update HandleInertiaRequests Middleware
-        $this->updateHandleInertiaRequests();
 
         // 10. Run migrations
         if (!$this->option('skip-migrate')) {
@@ -273,6 +270,26 @@ class InstallCommand extends Command
     }
 
     // ==========================================
+    // UPDATE APP JS (FORCE OVERWRITE)
+    // ==========================================
+    protected function updateAppJs(): void
+    {
+        $this->info('⚡ Updating app.js...');
+        
+        $sourcePath = __DIR__ . '/../resources/stubs/app.js.stub';
+        $targetPath = resource_path('js/app.js');
+
+        if (!File::exists($sourcePath)) {
+            $this->warn('  ⚠ app.js.stub not found.');
+            return;
+        }
+
+        // Paksa timpa file bawaan Laravel
+        File::copy($sourcePath, $targetPath);
+        $this->line('  ✓ app.js replaced with IslamiKit version');
+    }
+
+    // ==========================================
     // UPDATE HANDLE INERTIA REQUESTS
     // ==========================================
     protected function updateHandleInertiaRequests(): void
@@ -287,7 +304,7 @@ class InstallCommand extends Command
             return;
         }
 
-        // Langsung timpa file bawaan Laravel dengan versi Starterkit
+        // Paksa timpa file bawaan Laravel
         File::copy($sourcePath, $targetPath);
         $this->line('  ✓ HandleInertiaRequests.php updated');
     }

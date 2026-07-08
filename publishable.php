@@ -14,12 +14,6 @@ return [
         'source' => __DIR__ . '/resources/views/app.blade.php',
     ],
 
-    // App.js Utama (dari stub)
-    'starterkit-app-js' => [
-        'path' => resource_path('js/app.js'),
-        'source' => __DIR__ . '/resources/stubs/app.js.stub',
-    ],
-
     // CSS
     'starterkit-css' => [
         'path' => resource_path('css/starterkit.css'),
