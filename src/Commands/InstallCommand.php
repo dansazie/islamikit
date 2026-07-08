@@ -276,7 +276,7 @@ class InstallCommand extends Command
     {
         $this->info('⚡ Updating app.js...');
         
-        $sourcePath = __DIR__ . '/../resources/stubs/app.js.stub';
+        $sourcePath = __DIR__ . '/../../resources/stubs/app.js.stub';
         $targetPath = resource_path('js/app.js');
 
         if (!File::exists($sourcePath)) {
@@ -296,7 +296,7 @@ class InstallCommand extends Command
     {
         $this->info('🔗 Updating HandleInertiaRequests middleware...');
         
-        $sourcePath = __DIR__ . '/../resources/stubs/HandleInertiaRequests.stub';
+        $sourcePath = __DIR__ . '/../../resources/stubs/HandleInertiaRequests.stub';
         $targetPath = app_path('Http/Middleware/HandleInertiaRequests.php');
 
         if (!File::exists($sourcePath)) {

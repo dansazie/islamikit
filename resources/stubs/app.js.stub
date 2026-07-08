@@ -1,4 +1,3 @@
-// packages/starterkit/resources/stubs/app.js.stub
 import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 
@@ -14,7 +13,6 @@ createInertiaApp({
         const app = createApp({ render: () => h(App, props) });
         app.use(plugin);
         
-        // Register IslamiKit Starterkit Components globally
         if (window.registerStarterkitComponents) {
             window.registerStarterkitComponents(app);
         }

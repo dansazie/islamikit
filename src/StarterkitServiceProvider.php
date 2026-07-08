@@ -14,6 +14,7 @@ use Islamikit\Starterkit\Policies\SettingPolicy;
 use Islamikit\Starterkit\Policies\UserPolicy;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
+use Laravel\Fortify\Fortify;
 
 class StarterkitServiceProvider extends ServiceProvider
 {
@@ -27,7 +28,19 @@ class StarterkitServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // ✅ TAMBAHAN: Merge config agar bisa dibaca via config('starterkit.*')
+        Fortify::loginView(function () {
+            return Inertia::render('Auth/Login');
+        });
+        Fortify::registerView(function () {
+            return Inertia::render('Auth/Register');
+        });
+        Fortify::requestPasswordResetLinkView(function () {
+            return Inertia::render('Auth/ForgotPassword');
+        });
+        Fortify::resetPasswordView(function (Request $request) {
+            return Inertia::render('Auth/ResetPassword', ['request' => $request]);
+        });
+
         $this->mergeConfigFrom(__DIR__ . '/../config/starterkit.php', 'starterkit');
 
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');

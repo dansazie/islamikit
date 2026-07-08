@@ -9,12 +9,13 @@
     "prefer-stable": true,
     "autoload": {
         "psr-4": {
-            "Islamikit\\Starterkit\\": "src/"
+            "Islamikit\\Starterkit\\": "src/",
+            "Islamikit\\Starterkit\\Database\\Seeders\\": "database/seeders/"
         }
     },
     "autoload-dev": {
         "psr-4": {
-            "Islamikit\\Starterkit\\Database\\Seeders\\": "database/seeders/"
+            
         }
     },
     "require": {
