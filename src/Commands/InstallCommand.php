@@ -135,7 +135,7 @@ PHP;
 
     protected function updateAppServiceProvider(): void
     {
-        $this->info('🛡 Updating AppServiceProvider for Fortify Responses & Super Admin...');
+        $this->info('🛡 Updating AppServiceProvider for Fortify Responses & super-admin...');
         $path = app_path('Providers/AppServiceProvider.php');
 
         if (!File::exists($path)) {
@@ -174,9 +174,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        // Implicitly grant "Super Admin" role all permissions
+        // Implicitly grant "super-admin" role all permissions
         Gate::before(function ($user, $ability) {
-            return $user->hasRole('Super Admin') ? true : null;
+            return $user->hasRole('super-admin') ? true : null;
         });
     }
 }
@@ -414,7 +414,7 @@ PHP;
         $this->line('<comment>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</comment>');
         $this->line('<comment>Next steps:</comment>');
         $this->line('  1. <info>npm run dev</info> to start development');
-        $this->line('  2. Create a user, then visit <info>' . url('/login') . '</info>');
+        $this->line('  2. email: superadmin@islamikit.com and password: islamikit, then visit <info>' . url('/login') . '</info>');
         $this->line('');
         $this->line('<comment>Component prefixes:</comment>');
         $this->line('  Smart: <info>&lt;SmartButton&gt;</info> <info>&lt;SmartTable&gt;</info>');

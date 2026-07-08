@@ -27,9 +27,22 @@ return [
     |--------------------------------------------------------------------------
     | Available Locales
     |--------------------------------------------------------------------------
-    */
+    |*/
     'available_locales' => [
         'en' => 'English',
         'id' => 'Indonesia',
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Role Hierarchy & Visibility Rules
+    |--------------------------------------------------------------------------
+    | Menentukan daftar role mana saja yang dapat dilihat, dibuat, atau diubah 
+    | oleh pengguna berdasarkan role yang mereka sandang saat ini.
+    |*/
+    'role_hierarchy' => [
+        'super-admin' => ['super-admin', 'admin', 'editor'],
+        'admin'       => ['admin', 'editor'],
+        'editor'        => [],
     ],
 ];
