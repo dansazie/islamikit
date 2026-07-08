@@ -1,9 +1,9 @@
 <template>
     <div class="min-h-screen bg-background flex">
-        <!-- ═══ Impersonate Banner ═══ -->
+        <!-- --- Impersonate Banner --- -->
         <ImpersonateBanner v-if="isImpersonating" :impersonating="impersonating" />
 
-        <!-- ═══ Overlay Mobile ═══ -->
+        <!-- --- Overlay Mobile --- -->
         <Transition
             enter-active-class="transition-opacity duration-300"
             enter-from-class="opacity-0"
@@ -19,7 +19,7 @@
             ></div>
         </Transition>
 
-        <!-- ═══ Sidebar ═══ -->
+        <!-- --- Sidebar --- -->
         <aside
             @mouseenter="onSidebarEnter"
             @mouseleave="onSidebarLeave"
@@ -95,7 +95,7 @@
             </div>
         </aside>
 
-        <!-- ═══ Area Konten Utama ═══ -->
+        <!-- --- Area Konten Utama --- -->
         <div
             class="flex-1 flex flex-col min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
             :style="{ paddingLeft: isDesktop ? sidebarWidth + 'px' : '0' }"
@@ -118,17 +118,20 @@
 
                 <div class="flex items-center gap-1 sm:gap-1.5">
                     <LanguageSwitcher />
-                    <SmartNotificationBell :urls="$page.props.notificationUrls" />
+                    <SmartNotificationBell :urls="$page.props?.notificationUrls || {}" />
                     <DarkModeToggle />
                     <Dropdown width="56">
                         <template #trigger>
                             <button class="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
-                                <div v-if="$page.props.auth.user.avatar" class="w-7 h-7 rounded-full overflow-hidden shrink-0">
-                                    <img :src="$page.props.auth.user.avatar" :alt="userName" class="w-full h-full object-cover" />
+                                
+                                <!-- ? PERBAIKAN 1: Tambahkan ?. di sini -->
+                                <div v-if="$page.props?.auth?.user?.avatar" class="w-7 h-7 rounded-full overflow-hidden shrink-0">
+                                    <img :src="$page?.props?.auth?.user?.avatar" :alt="userName" class="w-full h-full object-cover" />
                                 </div>
                                 <div v-else class="w-7 h-7 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
                                     <span class="text-xs font-bold text-primary">{{ userInitial }}</span>
                                 </div>
+                                
                                 <span class="hidden sm:inline max-w-[100px] md:max-w-[120px] truncate">{{ userName }}</span>
                                 <svg class="w-4 h-4 shrink-0" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -253,7 +256,7 @@ onUnmounted(() => {
 const SIDEBAR_EXPANDED = 256;
 const SIDEBAR_COLLAPSED = 72;
 
-// ══════ HOVER-TO-EXPAND STATE ══════
+// ------ HOVER-TO-EXPAND STATE ------
 const sidebarHovered = ref(false);
 
 const onSidebarEnter = () => {

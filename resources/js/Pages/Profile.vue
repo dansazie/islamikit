@@ -13,7 +13,7 @@
                 <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 relative z-10">
                     <div class="relative group shrink-0">
                         <SmartAvatar 
-                            :src="avatarPreview || $page.props.auth.user.avatar" 
+                            :src="avatarPreview || $page.props?.auth?.user?.avatar" 
                             :name="form.name" 
                             size="xl" 
                             bordered 
@@ -31,13 +31,13 @@
                     </div>
 
                     <div class="text-center sm:text-left flex-1 min-w-0">
-                        <h1 class="app-title !text-lg sm:!text-xl">{{ form.name || $page.props.auth.user.name }}</h1>
-                        <p class="app-subtitle !text-xs sm:!text-sm">{{ form.email || $page.props.auth.user.email }}</p>
-                        <p v-if="$page.props.auth.user.phone" class="text-xs text-muted-foreground mt-0.5">
-                            {{ $page.props.auth.user.phone }}
+                        <h1 class="app-title !text-lg sm:!text-xl">{{ form.name || $page.props?.auth?.user?.name }}</h1>
+                        <p class="app-subtitle !text-xs sm:!text-sm">{{ form.email || $page.props?.auth?.user?.email }}</p>
+                        <p v-if="$page.props?.auth?.user?.phone" class="text-xs text-muted-foreground mt-0.5">
+                            {{ $page.props?.auth?.user?.phone }}
                         </p>
                         <div class="flex flex-wrap justify-center sm:justify-start gap-1.5 mt-2">
-                            <SmartBadge v-for="role in $page.props.auth.user.roles" :key="role" variant="primary" size="xs">
+                            <SmartBadge v-for="role in $page.props?.auth?.user?.roles" :key="role" variant="primary" size="xs">
                                 {{ role }}
                             </SmartBadge>
                         </div>

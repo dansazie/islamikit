@@ -74,6 +74,11 @@ class InstallCommand extends Command
             $this->runNpmBuild();
         }
 
+                $this->newLine();
+        $this->info('🧹 Clearing application caches...');
+        Artisan::call('optimize:clear');
+        $this->line('  ✓ Caches cleared');
+        
         $this->newLine();
         $this->info('✅ IslamiKit Starterkit installed successfully!');
         $this->newLine();

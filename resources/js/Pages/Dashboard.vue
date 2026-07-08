@@ -13,9 +13,9 @@
                 
                 <div class="flex items-center justify-between gap-4 relative z-10">
                     <div class="flex items-center gap-3 sm:gap-4 min-w-0">
-                        <SmartAvatar :src="$page.props.auth.user.avatar" :name="$page.props.auth.user.name" size="lg" status="online" bordered />
+                        <SmartAvatar :src="$page.props?.auth?.user?.avatar" :name="$page.props?.auth?.user?.name || ''" size="lg" status="online" bordered />
                         <div class="min-w-0">
-                            <h1 class="app-title !text-lg sm:!text-xl">{{ t('dashboard.welcome', { name: $page.props.auth.user.name.split(' ')[0] }) }}</h1>
+                            <h1 class="app-title !text-lg sm:!text-xl">{{ t('dashboard.welcome', { name: ($page.props?.auth?.user?.name || '').split(' ')[0] }) }}</h1>
                             <p class="app-subtitle !text-xs sm:!text-sm">{{ t('dashboard.welcome_subtitle') }}</p>
                         </div>
                     </div>
@@ -301,12 +301,12 @@
                     </SmartButton>
                 </div>
                 <div class="flex flex-wrap gap-2 mb-3">
-                    <SmartBadge v-for="role in $page.props.auth.user.roles" :key="role" variant="primary" size="md">{{ role }}</SmartBadge>
+                    <SmartBadge v-for="role in ($page.props?.auth?.user?.roles || [])" :key="role" variant="primary" size="md">{{ role }}</SmartBadge>
                 </div>
-                <div v-if="$page.props.auth.user.permissions?.length" class="p-3 bg-muted/30 rounded-xl border border-border">
+                <div v-if="($page.props?.auth?.user?.permissions || []).length" class="p-3 bg-muted/30 rounded-xl border border-border">
                     <p class="text-[10px] sm:text-xs text-muted-foreground mb-2 font-bold uppercase tracking-wider">{{ t('dashboard.roles.permissions_label') }}</p>
                     <div class="flex flex-wrap gap-1.5">
-                        <SmartBadge v-for="perm in $page.props.auth.user.permissions" :key="perm" variant="neutral" size="xs" :pill="false">{{ perm }}</SmartBadge>
+                        <SmartBadge v-for="perm in ($page.props?.auth?.user?.permissions || [])" :key="perm" variant="neutral" size="xs" :pill="false">{{ perm }}</SmartBadge>
                     </div>
                 </div>
             </div>
