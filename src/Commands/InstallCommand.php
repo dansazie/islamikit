@@ -55,6 +55,9 @@ class InstallCommand extends Command
         // 9. Update vite.config.js
         $this->updateViteConfig();
 
+        // 11. Publish Spatie Migrations (WAJIB SEBELUM MIGRATE)
+        $this->publishSpatieMigrations();
+
 
         // 10. Run migrations
         if (!$this->option('skip-migrate')) {
@@ -307,6 +310,29 @@ class InstallCommand extends Command
         // Paksa timpa file bawaan Laravel
         File::copy($sourcePath, $targetPath);
         $this->line('  ✓ HandleInertiaRequests.php updated');
+    }
+
+    // ==========================================
+    // PUBLISH SPATIE MIGRATIONS
+    // ==========================================
+    protected function publishSpatieMigrations(): void
+    {
+        $this->info('📦 Publishing Spatie package migrations...');
+
+        // 1. Spatie Permission Migrations
+        $this->call('vendor:publish', [
+            '--tag' => 'spatie-permission-migrations',
+            '--force' => true,
+        ]);
+
+        // 2. Spatie Settings Migrations
+        $this->call('vendor:publish', [
+            '--provider' => 'Spatie\LaravelSettings\LaravelSettingsServiceProvider',
+            '--tag' => 'settings-migrations',
+            '--force' => true,
+        ]);
+
+        $this->line('  ✓ Spatie migrations published to database/migrations');
     }
 
     // ==========================================
