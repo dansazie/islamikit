@@ -15,6 +15,7 @@ use Islamikit\Starterkit\Policies\UserPolicy;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 use Laravel\Fortify\Fortify;
+use Illuminate\Http\Request;
 
 class StarterkitServiceProvider extends ServiceProvider
 {
@@ -39,6 +40,9 @@ class StarterkitServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
+        $this->mergeConfigFrom(__DIR__ . '/../config/starterkit.php', 'starterkit');
+
+        // ✅ WAJIB ADA: Hubungkan Fortify dengan Inertia Vue
         Fortify::loginView(function () {
             return Inertia::render('Auth/Login');
         });
@@ -52,14 +56,11 @@ class StarterkitServiceProvider extends ServiceProvider
             return Inertia::render('Auth/ResetPassword', ['request' => $request]);
         });
 
-        $this->mergeConfigFrom(__DIR__ . '/../config/starterkit.php', 'starterkit');
-
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
         $this->loadRoutesFrom(__DIR__ . '/../routes/web.php');
         $this->loadRoutesFrom(__DIR__ . '/../routes/admin.php');
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'starterkit');
         
-        // Load translations untuk Blade (jika diperlukan)
         $langPath = __DIR__ . '/../resources/lang';
         $this->loadTranslationsFrom($langPath, 'starterkit');
         $this->loadJsonTranslationsFrom($langPath);

@@ -317,15 +317,21 @@ class InstallCommand extends Command
     {
         $this->info('📦 Publishing Spatie package migrations...');
 
-        // Gunakan --provider seperti di dokumentasi resmi Spatie
+        // 1. Spatie Permission
         $this->call('vendor:publish', [
             '--provider' => 'Spatie\Permission\PermissionServiceProvider',
             '--force' => true,
         ]);
 
+        // ✅ 2. Spatie Activity Log (WAJIB DITAMBAHKAN)
+        $this->call('vendor:publish', [
+            '--provider' => 'Spatie\Activitylog\ActivitylogServiceProvider',
+            '--tag' => 'activitylog-migrations',
+            '--force' => true,
+        ]);
+
         $this->line('  ✓ Spatie migrations & config published');
     }
-
     // ==========================================
     // POST INSTALL INFO
     // ==========================================
