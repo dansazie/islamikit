@@ -56,6 +56,9 @@ class InstallCommand extends Command
         // 9. Update vite.config.js
         $this->updateViteConfig();
 
+        // 11. Update HandleInertiaRequests Middleware
+        $this->updateHandleInertiaRequests();
+
         // 10. Run migrations
         if (!$this->option('skip-migrate')) {
             $this->runMigrations();
@@ -208,9 +211,12 @@ class InstallCommand extends Command
             return;
         }
 
+        // ✅ GUNAKAN NAMESPACE PACKAGE LANGSUNG
         $seeders = [
-            'Database\\Seeders\\Starterkit\\PermissionSeeder',
-            'Database\\Seeders\\Starterkit\\SettingsSeeder',
+            \Islamikit\Starterkit\Database\Seeders\PermissionSeeder::class,
+            \Islamikit\Starterkit\Database\Seeders\MenuSeeder::class,
+            \Islamikit\Starterkit\Database\Seeders\SettingsSeeder::class,
+            \Islamikit\Starterkit\Database\Seeders\UserSeeder::class, // Harus paling akhir
         ];
 
         foreach ($seeders as $seederClass) {
@@ -235,10 +241,19 @@ class InstallCommand extends Command
         $this->info('📦 Building frontend assets...');
 
         if (!$this->confirm('  Run npm install && npm run build now?', true)) {
-            $this->line('  ⊘ Skipped. Run manually: npm install && npm run build');
+            $this->line('  ⊘ Skipped. Run manually: npm install vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core && npm install && npm run build');
             return;
         }
 
+        // ✅ 1. Install package NPM yang dibutuhkan starterkit
+        $this->line('  Installing required NPM packages (Vue, Inertia, etc)...');
+        exec('npm install vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core 2>&1', $out, $code);
+        if ($code !== 0) {
+            $this->error('  ✗ NPM package installation failed');
+            return;
+        }
+
+        // ✅ 2. Install dependency lainnya
         $this->line('  Running npm install...');
         exec('npm install 2>&1', $out, $code);
         if ($code !== 0) {
@@ -246,6 +261,7 @@ class InstallCommand extends Command
             return;
         }
 
+        // ✅ 3. Build
         $this->line('  Running npm run build...');
         exec('npm run build 2>&1', $out, $code);
         if ($code !== 0) {
@@ -254,6 +270,26 @@ class InstallCommand extends Command
         }
 
         $this->line('  ✓ Frontend built successfully');
+    }
+
+    // ==========================================
+    // UPDATE HANDLE INERTIA REQUESTS
+    // ==========================================
+    protected function updateHandleInertiaRequests(): void
+    {
+        $this->info('🔗 Updating HandleInertiaRequests middleware...');
+        
+        $sourcePath = __DIR__ . '/../resources/stubs/HandleInertiaRequests.stub';
+        $targetPath = app_path('Http/Middleware/HandleInertiaRequests.php');
+
+        if (!File::exists($sourcePath)) {
+            $this->warn('  ⚠ HandleInertiaRequests stub not found.');
+            return;
+        }
+
+        // Langsung timpa file bawaan Laravel dengan versi Starterkit
+        File::copy($sourcePath, $targetPath);
+        $this->line('  ✓ HandleInertiaRequests.php updated');
     }
 
     // ==========================================

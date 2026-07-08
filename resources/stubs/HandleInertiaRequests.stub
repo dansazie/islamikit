@@ -1,0 +1,85 @@
+<?php
+
+namespace App\Http\Middleware;
+
+use App\Models\User;
+use Illuminate\Http\Request;
+use Inertia\Middleware;
+use Islamikit\Starterkit\Models\Menu;
+
+class HandleInertiaRequests extends Middleware
+{
+    public function share(Request $request): array
+    {
+        $user = $request->user();
+        $userRoles = $user ? $user->getRoleNames()->toArray() : [];
+        $locale = $user?->locale ?? config('app.locale', 'en');
+
+        sort($userRoles);
+
+        $menuTree = Menu::root()
+            ->with(['children'])
+            ->get()
+            ->filter(fn($menu) => $menu->hasAccess($userRoles))
+            ->map(function ($menu) use ($userRoles) {
+                return [
+                    'id' => $menu->id,
+                    'label' => $menu->localized_label,
+                    'labels' => $menu->labels,
+                    'url' => $menu->url,
+                    'icon' => $menu->icon,
+                    'type' => $menu->type,
+                    'children' => $menu->children
+                        ->filter(fn($child) => $child->hasAccess($userRoles))
+                        ->map(fn($child) => [
+                            'id' => $child->id,
+                            'label' => $child->localized_label,
+                            'labels' => $child->labels,
+                            'url' => $child->url,
+                            'icon' => $child->icon,
+                            'type' => $child->type,
+                        ])->values()->toArray()
+                ];
+            })->values()->toArray();
+
+        $impersonating = null;
+        if ($user && session()->has('impersonator_id')) {
+            $impersonator = User::find(session()->get('impersonator_id'));
+            if ($impersonator) {
+                $impersonating = [
+                    'id' => $impersonator->id,
+                    'name' => $impersonator->name,
+                ];
+            }
+        }
+
+        return array_merge(parent::share($request), [
+            'appName' => config('app.name', 'Laravel'),
+            'locale' => $locale,
+            'availableLocales' => config('starterkit.available_locales', ['en' => 'English']),
+            'auth' => [
+                'user' => $user ? [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'phone' => $user->phone,
+                    'avatar' => $user->avatar_url,
+                    'roles' => $user->getRoleNames(),
+                    'permissions' => $user->getAllPermissions()->pluck('name'),
+                ] : null,
+            ],
+            'unreadNotificationsCount' => $user ? $user->unreadNotifications()->count() : 0,
+            'notificationUrls' => [
+                'index' => url('/notifications'),
+                'read' => url('/notifications/'),
+                'readAll' => url('/notifications/read-all'),
+            ],
+            'menus' => $menuTree,
+            'impersonating' => $impersonating,
+            'flash' => [
+                'message' => fn () => $request->session()->get('message'),
+                'error' => fn () => $request->session()->get('error'),
+            ],
+        ]);
+    }
+}
