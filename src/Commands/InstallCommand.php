@@ -248,7 +248,7 @@ class InstallCommand extends Command
 
         // Install SEMUA dependency yang dibutuhkan (Vue, Plugin Vite, Inertia, animate-css)
         $this->line('  Installing Vue, Vite Plugin, Inertia, etc...');
-        exec('npm install vue @vitejs/plugin-vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core tw-animate-css 2>&1', $out, $code);
+        exec('npm install vue @vitejs/plugin-vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core unplugin-icons tw-animate-css 2>&1', $out, $code);
         
         $this->line('  Running full npm install...');
         exec('npm install 2>&1', $out, $code2);
