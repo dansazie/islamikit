@@ -91,42 +91,55 @@ class InstallCommand extends Command
         $path = app_path('Models/User.php');
 
         if (!File::exists($path)) {
-            $this->warn('  ⚠ User model not found. Please add \'locale\' to $fillable manually.');
+            $this->warn('  ⚠ User model not found.');
             return;
         }
 
         $content = File::get($path);
 
-        // Handle Laravel 11+ Modern Syntax: #[Fillable(['name', 'email', ...])]
-        if (Str::contains($content, '#[Fillable(')) {
-            if (!Str::contains($content, "'locale'")) {
-                $content = preg_replace(
-                    "/#\[Fillable\(\[(.*?)\]\)\]/",
-                    "#[Fillable([$1, 'locale'])]",
+        // 1. Tambahkan HasRoles trait
+        if (!Str::contains($content, 'use HasRoles;')) {
+            $content = str_replace(
+                'use HasRoles;',
+                '',
+                $content
+            ); // Bersihkan jika ada duplikat
+            $content = str_replace(
+                "use HasFactory, Notifiable, HasRoles;",
+                "use HasFactory, Notifiable, HasRoles;",
+                $content
+            );
+            
+            // Jika belum ada sama sekali
+            if (!Str::contains($content, 'HasRoles')) {
+                $content = str_replace(
+                    'use HasFactory, Notifiable;',
+                    "use HasFactory, Notifiable, HasRoles;",
                     $content
                 );
-                File::put($path, $content);
-                $this->line('  ✓ Added \'locale\' to User model #[Fillable]');
-            } else {
-                $this->line('  ✓ User model already has \'locale\'');
             }
-        } 
-        // Handle Legacy Syntax: protected $fillable = [...]
-        elseif (Str::contains($content, 'protected $fillable')) {
-            if (!Str::contains($content, "'locale'")) {
-                $content = preg_replace(
-                    "/protected \$fillable\s*=\s*\[(.*?)\];/s",
-                    "protected \$fillable = [$1, 'locale'];",
-                    $content
-                );
-                File::put($path, $content);
-                $this->line('  ✓ Added \'locale\' to User model $fillable');
-            } else {
-                $this->line('  ✓ User model already has \'locale\'');
-            }
-        } else {
-            $this->warn('  ⚠ Could not determine $fillable format. Add \'locale\' manually.');
         }
+
+        // 2. Tambahkan Import Spatie
+        if (!Str::contains($content, "use Spatie\Permission\Traits\HasRoles;")) {
+            $content = str_replace(
+                "use Illuminate\Notifications\Notifiable;",
+                "use Illuminate\Notifications\Notifiable;\nuse Spatie\Permission\Traits\HasRoles;",
+                $content
+            );
+        }
+
+        // 3. Tambahkan locale ke Fillable (Laravel 13)
+        if (Str::contains($content, '#[Fillable(') && !Str::contains($content, "'locale'")) {
+            $content = preg_replace(
+                "/#\[Fillable\(\[(.*?)\]\)\]/",
+                "#[Fillable([$1, 'locale', 'phone', 'avatar'])]",
+                $content
+            );
+        }
+
+        File::put($path, $content);
+        $this->line('  ✓ User model updated (HasRoles, Fillable)');
     }
 
     // ==========================================
@@ -147,29 +160,17 @@ class InstallCommand extends Command
     protected function updateViteConfig(): void
     {
         $this->info('⚡ Updating vite.config.js...');
-        $path = base_path('vite.config.js');
+        
+        $sourcePath = __DIR__ . '/../../resources/stubs/vite.config.stub';
+        $targetPath = base_path('vite.config.js');
 
-        if (!File::exists($path)) {
-            $this->warn('  ⚠ vite.config.js not found');
+        if (!File::exists($sourcePath)) {
+            $this->warn('  ⚠ vite.config.stub not found.');
             return;
         }
 
-        $content = File::get($path);
-
-        if (Str::contains($content, "'resources/js/starterkit.js'")) {
-            $this->line('  ✓ Already includes starterkit.js');
-            return;
-        }
-
-        // Tambahkan starterkit.js ke array input Vite
-        $content = preg_replace(
-            "/(input:\s*\[)(.*?)(\])/s",
-            "$1$2, 'resources/js/starterkit.js'$3",
-            $content
-        );
-
-        File::put($path, $content);
-        $this->line('  ✓ vite.config.js updated');
+        File::copy($sourcePath, $targetPath);
+        $this->line('  ✓ vite.config.js replaced with IslamiKit version');
     }
 
     // ==========================================
@@ -238,38 +239,28 @@ class InstallCommand extends Command
     protected function runNpmBuild(): void
     {
         $this->newLine();
-        $this->info('📦 Building frontend assets...');
+        $this->info('📦 Installing frontend dependencies...');
 
-        if (!$this->confirm('  Run npm install && npm run build now?', true)) {
-            $this->line('  ⊘ Skipped. Run manually: npm install vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core && npm install && npm run build');
+        if (!$this->confirm('  Run npm install now?', true)) {
+            $this->line('  ⊘ Skipped. Run manually: npm install && npm run dev');
             return;
         }
 
-        // ✅ 1. Install package NPM yang dibutuhkan starterkit
-        $this->line('  Installing required NPM packages (Vue, Inertia, etc)...');
-        exec('npm install vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core 2>&1', $out, $code);
-        if ($code !== 0) {
-            $this->error('  ✗ NPM package installation failed');
-            return;
-        }
-
-        // ✅ 2. Install dependency lainnya
-        $this->line('  Running npm install...');
-        exec('npm install 2>&1', $out, $code);
-        if ($code !== 0) {
+        // Install SEMUA dependency yang dibutuhkan (Vue, Plugin Vite, Inertia, animate-css)
+        $this->line('  Installing Vue, Vite Plugin, Inertia, etc...');
+        exec('npm install vue @vitejs/plugin-vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core tw-animate-css 2>&1', $out, $code);
+        
+        $this->line('  Running full npm install...');
+        exec('npm install 2>&1', $out, $code2);
+        
+        if ($code !== 0 || $code2 !== 0) {
             $this->error('  ✗ npm install failed');
             return;
         }
 
-        // ✅ 3. Build
-        $this->line('  Running npm run build...');
-        exec('npm run build 2>&1', $out, $code);
-        if ($code !== 0) {
-            $this->error('  ✗ npm run build failed');
-            return;
-        }
-
-        $this->line('  ✓ Frontend built successfully');
+        $this->line('  ✓ Dependencies installed successfully!');
+        $this->newLine();
+        $this->info('🚀 Next step: Run <info>npm run dev</info> to start the Vite server.');
     }
 
     // ==========================================
@@ -321,20 +312,13 @@ class InstallCommand extends Command
     {
         $this->info('📦 Publishing Spatie package migrations...');
 
-        // 1. Spatie Permission Migrations
+        // Gunakan --provider seperti di dokumentasi resmi Spatie
         $this->call('vendor:publish', [
-            '--tag' => 'spatie-permission-migrations',
+            '--provider' => 'Spatie\Permission\PermissionServiceProvider',
             '--force' => true,
         ]);
 
-        // 2. Spatie Settings Migrations
-        $this->call('vendor:publish', [
-            '--provider' => 'Spatie\LaravelSettings\LaravelSettingsServiceProvider',
-            '--tag' => 'settings-migrations',
-            '--force' => true,
-        ]);
-
-        $this->line('  ✓ Spatie migrations published to database/migrations');
+        $this->line('  ✓ Spatie migrations & config published');
     }
 
     // ==========================================
