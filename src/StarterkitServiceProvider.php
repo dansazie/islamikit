@@ -25,13 +25,14 @@ class StarterkitServiceProvider extends ServiceProvider
             \Laravel\Fortify\Contracts\LoginResponse::class,
             \Islamikit\Starterkit\Http\Responses\LoginResponse::class
         );
+
         $this->app->singleton(
             \Laravel\Fortify\Contracts\LogoutResponse::class,
             function () {
                 return new class implements \Laravel\Fortify\Contracts\LogoutResponse {
                     public function toResponse($request)
                     {
-                        return redirect()->route('login');
+                        return Inertia::location(url('/login'));
                     }
                 };
             }
@@ -42,7 +43,6 @@ class StarterkitServiceProvider extends ServiceProvider
     {
         $this->mergeConfigFrom(__DIR__ . '/../config/starterkit.php', 'starterkit');
 
-        // ✅ WAJIB ADA: Hubungkan Fortify dengan Inertia Vue
         Fortify::loginView(function () {
             return Inertia::render('Auth/Login');
         });
@@ -65,24 +65,17 @@ class StarterkitServiceProvider extends ServiceProvider
         $this->loadTranslationsFrom($langPath, 'starterkit');
         $this->loadJsonTranslationsFrom($langPath);
 
-        // =============================================
-        // PUSH TRANSLATIONS KE VUE VIA INERTIA
-        // =============================================
         Inertia::share('translations', function () {
             $locale = app()->getLocale();
             $fallbackLocale = config('app.fallback_locale', 'en');
-            
-            // ✅ PERBAIKAN: Resolve path di dalam closure agar mutlak & akurat
             $langPath = realpath(__DIR__ . '/../resources/lang');
             
             if ($langPath && is_dir($langPath)) {
-                // 1. Coba file sesuai locale aktif (misal: id.json)
                 $file = $langPath . '/' . $locale . '.json';
                 if (file_exists($file)) {
                     return json_decode(file_get_contents($file), true) ?? [];
                 }
 
-                // 2. Fallback ke default locale (misal: en.json)
                 $fallbackFile = $langPath . '/' . $fallbackLocale . '.json';
                 if (file_exists($fallbackFile)) {
                     return json_decode(file_get_contents($fallbackFile), true) ?? [];
@@ -110,8 +103,7 @@ class StarterkitServiceProvider extends ServiceProvider
         $router = $this->app['router'];
         $router->aliasMiddleware('route.permission', Http\Middleware\RoutePermission::class);
         $router->aliasMiddleware('impersonate.guard', Http\Middleware\PreventChainImpersonation::class);
-        //$router->aliasMiddleware('set.locale', Http\Middleware\SetLocale::class);
-        // Otomatis push middleware ke group 'web'
+
         $this->app->booted(function () {
             $this->app['router']->pushMiddlewareToGroup('web', Http\Middleware\SetLocale::class);
         });

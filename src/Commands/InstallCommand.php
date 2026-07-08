@@ -25,59 +25,45 @@ class InstallCommand extends Command
 
         $force = $this->option('force');
 
-        // 1. Update User Model (Tambahkan 'locale' ke fillable)
         $this->updateUserModel();
 
-        // 2. Publish Config
         $this->publish('starterkit-config', $force, '📋 Configuration');
 
-        // 3. Publish Root View (app.blade.php)
         $this->publish('starterkit-root-view', $force, '🎨 Root View');
 
-        // 4. Publish CSS
         $this->publish('starterkit-css', $force, '📦 CSS');
 
-
-        // 6. Publish Starterkit JS (Global Component Registration)
         $this->publish('starterkit-js', $force, '🧩 Starterkit JS');
 
-        // 7. Publish Components, Composables, Layouts, Pages
         $this->publish('starterkit-smart-components', $force, '💡 Smart Components');
         $this->publish('starterkit-ui-components', $force, '🎯 UI Components');
         $this->publish('starterkit-composables', $force, '🔧 Composables');
         $this->publish('starterkit-layouts', $force, '📐 Layouts');
         $this->publish('starterkit-pages', $force, '📄 Pages');
 
-        // 10. Force overwrite critical files
         $this->updateAppJs();
         $this->updateHandleInertiaRequests();
-
-        // 9. Update vite.config.js
         $this->updateViteConfig();
+        $this->updateBootstrapApp();
 
-        // 11. Publish Spatie Migrations (WAJIB SEBELUM MIGRATE)
         $this->publishSpatieMigrations();
 
-
-        // 10. Run migrations
         if (!$this->option('skip-migrate')) {
             $this->runMigrations();
         }
 
-        // 11. Run seeders
         if (!$this->option('skip-seed')) {
             $this->runSeeders();
         }
 
-        // 12. NPM build
         if (!$this->option('skip-npm')) {
             $this->runNpmBuild();
         }
 
-                $this->newLine();
+        $this->newLine();
         $this->info('🧹 Clearing application caches...');
         Artisan::call('optimize:clear');
-        $this->line('  ✓ Caches cleared');
+        $this->line('   ✓ Caches cleared');
         
         $this->newLine();
         $this->info('✅ IslamiKit Starterkit installed successfully!');
@@ -87,69 +73,65 @@ class InstallCommand extends Command
         return self::SUCCESS;
     }
 
-    // ==========================================
-    // UPDATE USER MODEL (WAJIB UNTUK DB LOCALE)
-    // ==========================================
     protected function updateUserModel(): void
     {
         $this->info('👤 Updating User Model...');
         $path = app_path('Models/User.php');
 
         if (!File::exists($path)) {
-            $this->warn('  ⚠ User model not found.');
+            $this->warn('   ⚠ User model not found.');
             return;
         }
 
-        $content = File::get($path);
+        $userStub = <<<'PHP'
+<?php
 
-        // 1. Tambahkan HasRoles trait
-        if (!Str::contains($content, 'use HasRoles;')) {
-            $content = str_replace(
-                'use HasRoles;',
-                '',
-                $content
-            ); // Bersihkan jika ada duplikat
-            $content = str_replace(
-                "use HasFactory, Notifiable, HasRoles;",
-                "use HasFactory, Notifiable, HasRoles;",
-                $content
-            );
-            
-            // Jika belum ada sama sekali
-            if (!Str::contains($content, 'HasRoles')) {
-                $content = str_replace(
-                    'use HasFactory, Notifiable;',
-                    "use HasFactory, Notifiable, HasRoles;",
-                    $content
-                );
-            }
-        }
+namespace App\Models;
 
-        // 2. Tambahkan Import Spatie
-        if (!Str::contains($content, "use Spatie\Permission\Traits\HasRoles;")) {
-            $content = str_replace(
-                "use Illuminate\Notifications\Notifiable;",
-                "use Illuminate\Notifications\Notifiable;\nuse Spatie\Permission\Traits\HasRoles;",
-                $content
-            );
-        }
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Database\Factories\UserFactory;
+use Illuminate\Database\Eloquent\Attributes\Fillable;
+use Illuminate\Database\Eloquent\Attributes\Hidden;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Storage;
+use Spatie\Permission\Traits\HasRoles;
 
-        // 3. Tambahkan locale ke Fillable (Laravel 13)
-        if (Str::contains($content, '#[Fillable(') && !Str::contains($content, "'locale'")) {
-            $content = preg_replace(
-                "/#\[Fillable\(\[(.*?)\]\)\]/",
-                "#[Fillable([$1, 'locale', 'phone', 'avatar'])]",
-                $content
-            );
-        }
+#[Fillable(['name', 'email', 'password', 'phone', 'avatar', 'locale'])]
+#[Hidden(['password', 'remember_token'])]
+class User extends Authenticatable
+{
+    /** @use HasFactory<UserFactory> */
+    use HasFactory, Notifiable, HasRoles;
 
-        File::put($path, $content);
-        $this->line('  ✓ User model updated (HasRoles, Fillable)');
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'email_verified_at' => 'datetime',
+            'password' => 'hashed',
+        ];
     }
 
-    // ==========================================
-    // PUBLISH
-    // ==========================================
+    /**
+     * Get the avatar URL.
+     */
+    public function getAvatarUrlAttribute(): ?string
+    {
+        return $this->avatar ? Storage::url($this->avatar) : null;
+    }
+}
+PHP;
+
+        File::put($path, $userStub);
+        $this->line('   ✓ User model successfully updated to full target structure');
+    }
+
     protected function publish(string $tag, bool $force, string $label): void
     {
         $this->info("{$label}...");
@@ -159,9 +141,6 @@ class InstallCommand extends Command
         ]);
     }
 
-    // ==========================================
-    // UPDATE VITE CONFIG
-    // ==========================================
     protected function updateViteConfig(): void
     {
         $this->info('⚡ Updating vite.config.js...');
@@ -170,59 +149,104 @@ class InstallCommand extends Command
         $targetPath = base_path('vite.config.js');
 
         if (!File::exists($sourcePath)) {
-            $this->warn('  ⚠ vite.config.stub not found.');
+            $this->warn('   ⚠ vite.config.stub not found.');
             return;
         }
 
         File::copy($sourcePath, $targetPath);
-        $this->line('  ✓ vite.config.js replaced with IslamiKit version');
+        $this->line('   ✓ vite.config.js replaced with IslamiKit version');
     }
 
-    // ==========================================
-    // MIGRATIONS
-    // ==========================================
+    protected function updateBootstrapApp(): void
+    {
+        $this->info('⚙ Automating bootstrap/app.php...');
+        $path = base_path('bootstrap/app.php');
+
+        if (!File::exists($path)) {
+            $this->warn('   ⚠ bootstrap/app.php not found.');
+            return;
+        }
+
+        $content = File::get($path);
+
+        $inertiaMiddleware = "\n            \$middleware->web(append: [\n                \\App\\Http\\Middleware\\HandleInertiaRequests::class,\n            ]);";
+
+        if (!Str::contains($content, 'HandleInertiaRequests::class')) {
+            if (Str::contains($content, 'withMiddleware(function (Middleware $middleware) {')) {
+                $content = str_replace(
+                    'withMiddleware(function (Middleware $middleware) {',
+                    "withMiddleware(function (Middleware \$middleware) {{$inertiaMiddleware}",
+                    $content
+                );
+            } elseif (Str::contains($content, 'withMiddleware(function ($middleware) {')) {
+                $content = str_replace(
+                    'withMiddleware(function ($middleware) {',
+                    "withMiddleware(function (\$middleware) {{$inertiaMiddleware}",
+                    $content
+                );
+            }
+        }
+
+        $permissionAlias = "\n            \$middleware->alias([\n                'route.permission' => \\Islamikit\\Starterkit\\Http\\Middleware\\RoutePermission::class,\n            ]);";
+
+        if (!Str::contains($content, 'route.permission')) {
+            if (Str::contains($content, 'withMiddleware(function (Middleware $middleware) {')) {
+                $content = str_replace(
+                    'withMiddleware(function (Middleware $middleware) {',
+                    "withMiddleware(function (Middleware \$middleware) {{$permissionAlias}",
+                    $content
+                );
+            } elseif (Str::contains($content, 'withMiddleware(function ($middleware) {')) {
+                $content = str_replace(
+                    'withMiddleware(function ($middleware) {',
+                    "withMiddleware(function (\$middleware) {{$permissionAlias}",
+                    $content
+                );
+            }
+        }
+
+        File::put($path, $content);
+        $this->line('   ✓ bootstrap/app.php configured with Inertia & RoutePermission');
+    }
+
     protected function runMigrations(): void
     {
         $this->newLine();
         $this->info('🔄 Running migrations...');
 
-        if (!$this->confirm('  Run migrations now?', true)) {
-            $this->line('  ⊘ Skipped');
+        if (!$this->confirm('   Run migrations now?', true)) {
+            $this->line('   ⊘ Skipped');
             return;
         }
 
         try {
             Artisan::call('migrate', ['--force' => true]);
-            $this->line('  ✓ Migrations completed');
+            $this->line('   ✓ Migrations completed');
         } catch (\Exception $e) {
             $msg = $e->getMessage();
             if (Str::contains($msg, 'already exists')) {
-                $this->line('  ⚠ Tables already exist — skipping');
+                $this->line('   ⚠ Tables already exist — skipping');
             } else {
-                $this->error("  ✗ Migration failed: {$msg}");
+                $this->error("   ✗ Migration failed: {$msg}");
             }
         }
     }
 
-    // ==========================================
-    // SEEDERS
-    // ==========================================
     protected function runSeeders(): void
     {
         $this->newLine();
         $this->info('🌱 Running seeders...');
 
-        if (!$this->confirm('  Run seeders now?', true)) {
-            $this->line('  ⊘ Skipped');
+        if (!$this->confirm('   Run seeders now?', true)) {
+            $this->line('   ⊘ Skipped');
             return;
         }
 
-        // ✅ GUNAKAN NAMESPACE PACKAGE LANGSUNG
         $seeders = [
             \Islamikit\Starterkit\Database\Seeders\PermissionSeeder::class,
             \Islamikit\Starterkit\Database\Seeders\MenuSeeder::class,
             \Islamikit\Starterkit\Database\Seeders\SettingsSeeder::class,
-            \Islamikit\Starterkit\Database\Seeders\UserSeeder::class, // Harus paling akhir
+            \Islamikit\Starterkit\Database\Seeders\UserSeeder::class,
         ];
 
         foreach ($seeders as $seederClass) {
@@ -231,46 +255,39 @@ class InstallCommand extends Command
                     '--class' => $seederClass,
                     '--force' => true,
                 ]);
-                $this->line("  ✓ {$seederClass}");
+                $this->line("   ✓ {$seederClass}");
             } catch (\Exception $e) {
-                $this->warn("  ⚠ {$seederClass}: " . $e->getMessage());
+                $this->warn("   ⚠ {$seederClass}: " . $e->getMessage());
             }
         }
     }
 
-    // ==========================================
-    // NPM BUILD
-    // ==========================================
     protected function runNpmBuild(): void
     {
         $this->newLine();
         $this->info('📦 Installing frontend dependencies...');
 
-        if (!$this->confirm('  Run npm install now?', true)) {
-            $this->line('  ⊘ Skipped. Run manually: npm install && npm run dev');
+        if (!$this->confirm('   Run npm install now?', true)) {
+            $this->line('   ⊘ Skipped. Run manually: npm install && npm run dev');
             return;
         }
 
-        // Install SEMUA dependency yang dibutuhkan (Vue, Plugin Vite, Inertia, animate-css)
-        $this->line('  Installing Vue, Vite Plugin, Inertia, etc...');
+        $this->line('   Installing Vue, Vite Plugin, Inertia, etc...');
         exec('npm install vue @vitejs/plugin-vue @inertiajs/inertia-vue3 @inertiajs/vue3 @vueuse/core unplugin-icons tw-animate-css 2>&1', $out, $code);
         
-        $this->line('  Running full npm install...');
+        $this->line('   Running full npm install...');
         exec('npm install 2>&1', $out, $code2);
         
         if ($code !== 0 || $code2 !== 0) {
-            $this->error('  ✗ npm install failed');
+            $this->error('   ✗ npm install failed');
             return;
         }
 
-        $this->line('  ✓ Dependencies installed successfully!');
+        $this->line('   ✓ Dependencies installed successfully!');
         $this->newLine();
         $this->info('🚀 Next step: Run <info>npm run dev</info> to start the Vite server.');
     }
 
-    // ==========================================
-    // UPDATE APP JS (FORCE OVERWRITE)
-    // ==========================================
     protected function updateAppJs(): void
     {
         $this->info('⚡ Updating app.js...');
@@ -279,18 +296,14 @@ class InstallCommand extends Command
         $targetPath = resource_path('js/app.js');
 
         if (!File::exists($sourcePath)) {
-            $this->warn('  ⚠ app.js.stub not found.');
+            $this->warn('   ⚠ app.js.stub not found.');
             return;
         }
 
-        // Paksa timpa file bawaan Laravel
         File::copy($sourcePath, $targetPath);
-        $this->line('  ✓ app.js replaced with IslamiKit version');
+        $this->line('   ✓ app.js replaced with IslamiKit version');
     }
 
-    // ==========================================
-    // UPDATE HANDLE INERTIA REQUESTS
-    // ==========================================
     protected function updateHandleInertiaRequests(): void
     {
         $this->info('🔗 Updating HandleInertiaRequests middleware...');
@@ -299,42 +312,34 @@ class InstallCommand extends Command
         $targetPath = app_path('Http/Middleware/HandleInertiaRequests.php');
 
         if (!File::exists($sourcePath)) {
-            $this->warn('  ⚠ HandleInertiaRequests stub not found.');
+            $this->warn('   ⚠ HandleInertiaRequests stub not found.');
             return;
         }
 
         File::ensureDirectoryExists(app_path('Http/Middleware'));
 
-        // Paksa timpa file bawaan Laravel
         File::copy($sourcePath, $targetPath);
-        $this->line('  ✓ HandleInertiaRequests.php updated');
+        $this->line('   ✓ HandleInertiaRequests.php updated');
     }
 
-    // ==========================================
-    // PUBLISH SPATIE MIGRATIONS
-    // ==========================================
     protected function publishSpatieMigrations(): void
     {
         $this->info('📦 Publishing Spatie package migrations...');
 
-        // 1. Spatie Permission
         $this->call('vendor:publish', [
             '--provider' => 'Spatie\Permission\PermissionServiceProvider',
             '--force' => true,
         ]);
 
-        // ✅ 2. Spatie Activity Log (WAJIB DITAMBAHKAN)
         $this->call('vendor:publish', [
             '--provider' => 'Spatie\Activitylog\ActivitylogServiceProvider',
             '--tag' => 'activitylog-migrations',
             '--force' => true,
         ]);
 
-        $this->line('  ✓ Spatie migrations & config published');
+        $this->line('   ✓ Spatie migrations & config published');
     }
-    // ==========================================
-    // POST INSTALL INFO
-    // ==========================================
+
     protected function displayPostInstallInfo(): void
     {
         $this->line('<comment>━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━</comment>');
