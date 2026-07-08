@@ -28,14 +28,7 @@ class StarterkitServiceProvider extends ServiceProvider
 
         $this->app->singleton(
             \Laravel\Fortify\Contracts\LogoutResponse::class,
-            function () {
-                return new class implements \Laravel\Fortify\Contracts\LogoutResponse {
-                    public function toResponse($request)
-                    {
-                        return Inertia::location(url('/login'));
-                    }
-                };
-            }
+            \Islamikit\Starterkit\Http\Responses\LogoutResponse::class
         );
     }
 

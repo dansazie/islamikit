@@ -26,6 +26,7 @@ class InstallCommand extends Command
         $force = $this->option('force');
 
         $this->updateUserModel();
+        $this->updateAppServiceProvider();
 
         $this->publish('starterkit-config', $force, '📋 Configuration');
 
@@ -132,6 +133,59 @@ PHP;
         $this->line('   ✓ User model successfully updated to full target structure');
     }
 
+    protected function updateAppServiceProvider(): void
+    {
+        $this->info('🛡 Updating AppServiceProvider for Fortify Responses & Super Admin...');
+        $path = app_path('Providers/AppServiceProvider.php');
+
+        if (!File::exists($path)) {
+            $this->warn('   ⚠ AppServiceProvider.php not found.');
+            return;
+        }
+
+        $providerStub = <<<'PHP'
+<?php
+
+namespace App\Providers;
+
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Support\Facades\Gate;
+
+class AppServiceProvider extends ServiceProvider
+{
+    /**
+     * Register any application services.
+     */
+    public function register(): void
+    {
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\LoginResponse::class,
+            \Islamikit\Starterkit\Http\Responses\LoginResponse::class
+        );
+
+        $this->app->singleton(
+            \Laravel\Fortify\Contracts\LogoutResponse::class,
+            \Islamikit\Starterkit\Http\Responses\LogoutResponse::class
+        );
+    }
+
+    /**
+     * Bootstrap any application services.
+     */
+    public function boot(): void
+    {
+        // Implicitly grant "Super Admin" role all permissions
+        Gate::before(function ($user, $ability) {
+            return $user->hasRole('Super Admin') ? true : null;
+        });
+    }
+}
+PHP;
+
+        File::put($path, $providerStub);
+        $this->line('   ✓ AppServiceProvider fully overridden with Login/Logout Responses and Gate');
+    }
+
     protected function publish(string $tag, bool $force, string $label): void
     {
         $this->info("{$label}...");
@@ -169,44 +223,59 @@ PHP;
 
         $content = File::get($path);
 
-        $inertiaMiddleware = "\n            \$middleware->web(append: [\n                \\App\\Http\\Middleware\\HandleInertiaRequests::class,\n            ]);";
+        $inertiaAndPermissionCode = <<<'PHP'
+    ->withMiddleware(function (Middleware $middleware): void {
+        $middleware->web(append: [
+            \App\Http\Middleware\HandleInertiaRequests::class,
+        ]);
 
-        if (!Str::contains($content, 'HandleInertiaRequests::class')) {
-            if (Str::contains($content, 'withMiddleware(function (Middleware $middleware) {')) {
-                $content = str_replace(
-                    'withMiddleware(function (Middleware $middleware) {',
-                    "withMiddleware(function (Middleware \$middleware) {{$inertiaMiddleware}",
-                    $content
-                );
-            } elseif (Str::contains($content, 'withMiddleware(function ($middleware) {')) {
-                $content = str_replace(
-                    'withMiddleware(function ($middleware) {',
-                    "withMiddleware(function (\$middleware) {{$inertiaMiddleware}",
-                    $content
-                );
+        $middleware->alias([
+            'route.permission' => \Islamikit\Starterkit\Http\Middleware\RoutePermission::class,
+        ]);
+    })
+PHP;
+
+        if (Str::contains($content, '->withMiddleware(function (Middleware $middleware): void {')) {
+            $pattern = '/->withMiddleware\(function\s*\(Middleware\s*\$middleware\):\s*void\s*\{[^}]*\}\)/';
+            $content = preg_replace($pattern, $inertiaAndPermissionCode, $content);
+        } else {
+            $inertiaMiddleware = "\n            \$middleware->web(append: [\n                \\App\\Http\\Middleware\\HandleInertiaRequests::class,\n            ]);";
+            if (!Str::contains($content, 'HandleInertiaRequests::class')) {
+                if (Str::contains($content, 'withMiddleware(function (Middleware $middleware) {')) {
+                    $content = str_replace(
+                        'withMiddleware(function (Middleware $middleware) {',
+                        "withMiddleware(function (Middleware \$middleware) {{$inertiaMiddleware}",
+                        $content
+                    );
+                } elseif (Str::contains($content, 'withMiddleware(function ($middleware) {')) {
+                    $content = str_replace(
+                        'withMiddleware(function ($middleware) {',
+                        "withMiddleware(function (\$middleware) {{$inertiaMiddleware}",
+                        $content
+                    );
+                }
             }
-        }
 
-        $permissionAlias = "\n            \$middleware->alias([\n                'route.permission' => \\Islamikit\\Starterkit\\Http\\Middleware\\RoutePermission::class,\n            ]);";
-
-        if (!Str::contains($content, 'route.permission')) {
-            if (Str::contains($content, 'withMiddleware(function (Middleware $middleware) {')) {
-                $content = str_replace(
-                    'withMiddleware(function (Middleware $middleware) {',
-                    "withMiddleware(function (Middleware \$middleware) {{$permissionAlias}",
-                    $content
-                );
-            } elseif (Str::contains($content, 'withMiddleware(function ($middleware) {')) {
-                $content = str_replace(
-                    'withMiddleware(function ($middleware) {',
-                    "withMiddleware(function (\$middleware) {{$permissionAlias}",
-                    $content
-                );
+            $permissionAlias = "\n            \$middleware->alias([\n                'route.permission' => \\Islamikit\\Starterkit\\Http\\Middleware\\RoutePermission::class,\n            ]);";
+            if (!Str::contains($content, 'route.permission')) {
+                if (Str::contains($content, 'withMiddleware(function (Middleware $middleware) {')) {
+                    $content = str_replace(
+                        'withMiddleware(function (Middleware $middleware) {',
+                        "withMiddleware(function (Middleware \$middleware) {{$permissionAlias}",
+                        $content
+                    );
+                } elseif (Str::contains($content, 'withMiddleware(function ($middleware) {')) {
+                    $content = str_replace(
+                        'withMiddleware(function ($middleware) {',
+                        "withMiddleware(function (\$middleware) {{$permissionAlias}",
+                        $content
+                    );
+                }
             }
         }
 
         File::put($path, $content);
-        $this->line('   ✓ bootstrap/app.php configured with Inertia & RoutePermission');
+        $this->line('   ✓ bootstrap/app.php successfully overridden with Inertia & RoutePermission');
     }
 
     protected function runMigrations(): void
