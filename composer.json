@@ -1,0 +1,36 @@
+{
+    "$schema": "https://getcomposer.org/schema.json",
+    "name": "islamikit/starterkit",
+    "description": "Laravel 13 starterkit with Inertia Vue 3, Fortify, Spatie",
+    "version": "1.0.0",
+    "type": "library",
+    "license": "MIT",
+    "keywords": ["laravel", "inertiajs", "vue3", "starter-kit", "admin-panel"],
+    "minimum-stability": "stable",
+    "prefer-stable": true,
+    "autoload": {
+        "psr-4": {
+            "Islamikit\\Starterkit\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Islamikit\\Starterkit\\Database\\Seeders\\": "database/seeders/"
+        }
+    },
+    "require": {
+        "php": "^8.2",
+        "inertiajs/inertia-laravel": "^3.1",
+        "laravel/fortify": "^1.36",
+        "spatie/laravel-activitylog": "^4.12",
+        "spatie/laravel-permission": "^8.3",
+        "spatie/laravel-settings": "^3.9"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Islamikit\\Starterkit\\StarterkitServiceProvider"
+            ]
+        }
+    }
+}

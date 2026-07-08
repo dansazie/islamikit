@@ -1,0 +1,28 @@
+// packages/starterkit/resources/stubs/app.js.stub
+import { createApp, h } from 'vue';
+import { createInertiaApp } from '@inertiajs/vue3';
+
+const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
+
+createInertiaApp({
+    title: (title) => `${title} - ${appName}`,
+    resolve: (name) => {
+        const pages = import.meta.glob('./Pages/**/*.vue');
+        return pages[`./Pages/${name}.vue`]();
+    },
+    setup({ el, App, props, plugin }) {
+        const app = createApp({ render: () => h(App, props) });
+        app.use(plugin);
+        
+        // Register IslamiKit Starterkit Components globally
+        if (window.registerStarterkitComponents) {
+            window.registerStarterkitComponents(app);
+        }
+
+        app.mount(el);
+        return app;
+    },
+    progress: {
+        color: '#4B5563',
+    },
+});
