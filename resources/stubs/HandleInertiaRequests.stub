@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Islamikit\Starterkit\Models\Menu;
+use Islamikit\Starterkit\Settings\GeneralSettings;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -53,8 +54,15 @@ class HandleInertiaRequests extends Middleware
             }
         }
 
+        $generalSettings = app(GeneralSettings::class);
+
         return array_merge(parent::share($request), [
-            'appName' => config('app.name', 'Laravel'),
+            'appName' => $generalSettings->app_name ?? config('app.name', 'Laravel'),
+            'app_settings' => [
+                'app_name' => $generalSettings->app_name ?? config('app.name', 'Laravel'),
+                'app_description' => $generalSettings->app_description,
+                'date_format' => $generalSettings->date_format ?? 'd/m/Y',
+            ],
             'locale' => $locale,
             'availableLocales' => config('starterkit.available_locales', ['en' => 'English']),
             'auth' => [

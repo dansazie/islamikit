@@ -3,6 +3,7 @@
 namespace Islamikit\Starterkit\Http\Responses;
 
 use Laravel\Fortify\Contracts\LogoutResponse as LogoutResponseContract;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class LogoutResponse implements LogoutResponseContract
@@ -15,6 +16,15 @@ class LogoutResponse implements LogoutResponseContract
      */
     public function toResponse($request)
     {
+        $user = Auth::user();
+
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($user)
+                ->log('User logged out from the application');
+        }
+        
         return Inertia::location(url('/login'));
     }
 }

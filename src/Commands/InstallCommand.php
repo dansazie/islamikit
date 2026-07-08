@@ -76,7 +76,7 @@ class InstallCommand extends Command
 
     protected function updateUserModel(): void
     {
-        $this->info('👤 Updating User Model...');
+        $this->info('👤 Updating User Model with Spatie Activity Log...');
         $path = app_path('Models/User.php');
 
         if (!File::exists($path)) {
@@ -98,13 +98,15 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Facades\Storage;
 use Spatie\Permission\Traits\HasRoles;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 #[Fillable(['name', 'email', 'password', 'phone', 'avatar', 'locale'])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
 {
     /** @use HasFactory<UserFactory> */
-    use HasFactory, Notifiable, HasRoles;
+    use HasFactory, Notifiable, HasRoles, LogsActivity;
 
     /**
      * Get the attributes that should be cast.
@@ -126,16 +128,28 @@ class User extends Authenticatable
     {
         return $this->avatar ? Storage::url($this->avatar) : null;
     }
+
+    /**
+     * Configure the activity log options for User model.
+     */
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->logFillable()
+            ->logOnlyDirty()
+            ->dontLogIfAttributesChangedOnly(['password', 'remember_token', 'avatar', 'locale'])
+            ->setDescriptionForEvent(fn(string $eventName) => "User has been {$eventName}");
+    }
 }
 PHP;
 
         File::put($path, $userStub);
-        $this->line('   ✓ User model successfully updated to full target structure');
+        $this->line('   ✓ User model successfully updated with LogsActivity trait');
     }
 
     protected function updateAppServiceProvider(): void
     {
-        $this->info('🛡 Updating AppServiceProvider for Fortify Responses & super-admin...');
+        $this->info('🛡 Updating AppServiceProvider for Fortify Responses, Activity Logs & super-admin...');
         $path = app_path('Providers/AppServiceProvider.php');
 
         if (!File::exists($path)) {
@@ -150,6 +164,9 @@ namespace App\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Event;
+use Illuminate\Auth\Events\Login;
+use Illuminate\Auth\Events\Logout;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -178,12 +195,32 @@ class AppServiceProvider extends ServiceProvider
         Gate::before(function ($user, $ability) {
             return $user->hasRole('super-admin') ? true : null;
         });
+
+        // Listen ke Event Login bawaan Laravel & Fortify
+        Event::listen(Login::class, function (Login $event) {
+            if ($event->user) {
+                activity()
+                    ->causedBy($event->user)
+                    ->performedOn($event->user)
+                    ->log('User logged in to the application');
+            }
+        });
+
+        // Listen ke Event Logout bawaan Laravel & Fortify
+        Event::listen(Logout::class, function (Logout $event) {
+            if ($event->user) {
+                activity()
+                    ->causedBy($event->user)
+                    ->performedOn($event->user)
+                    ->log('User logged out from the application');
+            }
+        });
     }
 }
 PHP;
 
         File::put($path, $providerStub);
-        $this->line('   ✓ AppServiceProvider fully overridden with Login/Logout Responses and Gate');
+        $this->line('   ✓ AppServiceProvider fully overridden with Login/Logout Listeners and Gate');
     }
 
     protected function publish(string $tag, bool $force, string $label): void

@@ -1,9 +1,7 @@
 <template>
     <div class="min-h-screen bg-background flex">
-        <!-- --- Impersonate Banner --- -->
         <ImpersonateBanner v-if="isImpersonating" :impersonating="impersonating" />
 
-        <!-- --- Overlay Mobile --- -->
         <Transition
             enter-active-class="transition-opacity duration-300"
             enter-from-class="opacity-0"
@@ -19,7 +17,6 @@
             ></div>
         </Transition>
 
-        <!-- --- Sidebar --- -->
         <aside
             @mouseenter="onSidebarEnter"
             @mouseleave="onSidebarLeave"
@@ -30,19 +27,16 @@
             ]"
             :style="{ width: sidebarWidth + 'px' }"
         >
-            <!-- Header Logo -->
             <div
                 class="h-14 sm:h-16 flex items-center border-b border-sidebar-border shrink-0 overflow-hidden transition-all duration-300"
                 :class="isVisuallyExpanded ? 'px-4 sm:px-5' : 'justify-center px-2 sm:px-3'"
             >
-                <!-- Ikon selalu tampil -->
                 <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-lg bg-sidebar-primary flex items-center justify-center shrink-0">
                     <svg class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-sidebar-primary-foreground" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.042A8.967 8.967 0 006 3.75c-1.052 0-2.062.18-3 .512v14.25A8.987 8.987 0 016 18c2.305 0 4.408.867 6 2.292m0-14.25a8.966 8.966 0 016-2.292c1.052 0 2.062.18 3 .512v14.25A8.987 8.987 0 0018 18a8.967 8.967 0 00-6 2.292m0-14.25v14.25" />
                     </svg>
                 </div>
 
-                <!-- Nama aplikasi: slide masuk saat expand -->
                 <div
                     class="overflow-hidden transition-all duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
                     :class="isVisuallyExpanded ? 'max-w-[180px] sm:max-w-[220px] opacity-100 ml-2.5 sm:ml-3' : 'max-w-0 opacity-0 ml-0'"
@@ -51,7 +45,6 @@
                 </div>
             </div>
 
-            <!-- Menu Navigasi -->
             <nav
                 class="flex-1 overflow-y-auto overflow-x-hidden custom-scrollbar transition-[padding] duration-300"
                 :class="isVisuallyExpanded ? 'py-3 sm:py-4 px-2.5 sm:px-3' : 'py-2 sm:py-3 px-2 sm:px-2.5'"
@@ -65,7 +58,6 @@
                 />
             </nav>
 
-            <!-- Tombol Collapse/Expand -->
             <div class="hidden md:block border-t border-sidebar-border shrink-0">
                 <button
                     @click="collapsed = !collapsed"
@@ -87,7 +79,6 @@
                 </button>
             </div>
 
-            <!-- Footer Sidebar -->
             <div
                 class="border-t border-sidebar-border shrink-0 overflow-hidden transition-all duration-300 py-2 px-2 text-center"
             >
@@ -95,12 +86,10 @@
             </div>
         </aside>
 
-        <!-- --- Area Konten Utama --- -->
         <div
             class="flex-1 flex flex-col min-h-screen transition-[padding-left] duration-300 ease-[cubic-bezier(0.4,0,0.2,1)]"
             :style="{ paddingLeft: isDesktop ? sidebarWidth + 'px' : '0' }"
         >
-            <!-- Header -->
             <header class="no-print h-14 sm:h-16 bg-card border-b border-border flex items-center justify-between px-3 sm:px-4 md:px-6 sticky top-0 z-20">
                 <div class="flex items-center gap-2 sm:gap-3">
                     <button
@@ -124,7 +113,6 @@
                         <template #trigger>
                             <button class="inline-flex items-center gap-1.5 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-sm font-medium rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer">
                                 
-                                <!-- ? PERBAIKAN 1: Tambahkan ?. di sini -->
                                 <div v-if="$page.props?.auth?.user?.avatar" class="w-7 h-7 rounded-full overflow-hidden shrink-0">
                                     <img :src="$page?.props?.auth?.user?.avatar" :alt="userName" class="w-full h-full object-cover" />
                                 </div>
@@ -162,7 +150,6 @@
                 </div>
             </header>
 
-            <!-- Main Content -->
             <main class="flex-1 p-3 sm:p-4 md:p-6 lg:p-8">
                 <Transition name="page-fade" mode="out-in">
                     <div :key="$page.url" class="app-content-max">
@@ -222,7 +209,6 @@ const menus = computed(() => {
 
 const sidebarOpen = ref(false);
 
-// Default: collapsed di tablet (md), expanded di desktop (lg)
 const getDefaultCollapsed = () => {
     const saved = localStorage.getItem('sidebar-collapsed');
     if (saved !== null) return saved === 'true';
@@ -256,7 +242,6 @@ onUnmounted(() => {
 const SIDEBAR_EXPANDED = 256;
 const SIDEBAR_COLLAPSED = 72;
 
-// ------ HOVER-TO-EXPAND STATE ------
 const sidebarHovered = ref(false);
 
 const onSidebarEnter = () => {
@@ -269,18 +254,15 @@ const onSidebarLeave = () => {
     sidebarHovered.value = false;
 };
 
-// Apakah sedang dalam mode hover-expand?
 const isHoverExpanded = computed(() => {
     return collapsed.value && sidebarHovered.value && isDesktop.value;
 });
 
-// Apakah sidebar secara visual menampilkan konten penuh?
 const isVisuallyExpanded = computed(() => {
     if (!isDesktop.value) return true;
     return !collapsed.value || sidebarHovered.value;
 });
 
-// Lebar sidebar: mempertimbangkan hover-expand
 const sidebarWidth = computed(() => {
     if (!isDesktop.value) return SIDEBAR_EXPANDED;
     if (collapsed.value && !sidebarHovered.value) return SIDEBAR_COLLAPSED;

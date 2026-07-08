@@ -22,11 +22,20 @@ class ImpersonateController extends Controller
             abort(403, 'Cannot start impersonation while already impersonating.');
         }
 
-        // Simpan ID impersonator asli
-        session()->put('impersonator_id', $request->user()->id);
+        // Ambil data admin asli sebelum Auth session berubah
+        $adminUser = $request->user();
 
-        // Log activity
-        Log::info("User {$request->user()->name} started impersonating {$targetUser->name}");
+        // Simpan ID impersonator asli
+        session()->put('impersonator_id', $adminUser->id);
+
+        // Log Laravel internal
+        Log::info("User {$adminUser->name} started impersonating {$targetUser->name}");
+
+        // Rekam ke Spatie Activity Log (Posisikan SEBELUM Auth::login agar causer terekam akurat jika otomatis)
+        activity()
+            ->causedBy($adminUser) 
+            ->performedOn($targetUser) 
+            ->log("Admin started impersonating user: {$targetUser->name}");
 
         // Login sebagai target user
         Auth::login($targetUser);
@@ -56,6 +65,12 @@ class ImpersonateController extends Controller
         }
 
         Log::info("User {$impersonator->name} stopped impersonating {$request->user()->name}");
+
+        // Rekam ke Spatie Activity Log menggunakan instance $impersonator yang valid
+        activity()
+            ->causedBy($impersonator)
+            ->performedOn($request->user()) // Target yang dilepas impersonate-nya
+            ->log("Admin stopped impersonating and returned to original account");
 
         // Hapus state impersonate
         session()->forget('impersonator_id');

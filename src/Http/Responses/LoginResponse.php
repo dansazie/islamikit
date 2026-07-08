@@ -3,17 +3,25 @@
 namespace Islamikit\Starterkit\Http\Responses;
 
 use Laravel\Fortify\Contracts\LoginResponse as LoginResponseContract;
+use Illuminate\Support\Facades\Auth;
 
 class LoginResponse implements LoginResponseContract
 {
-    /**
-     * Create an HTTP response that represents the object.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Symfony\Component\HttpFoundation\Response
-     */
     public function toResponse($request)
     {
-        return redirect()->intended('/dashboard');
+        $user = Auth::user();
+
+        if ($user) {
+            activity()
+                ->causedBy($user)
+                ->performedOn($user)
+                ->log('User logged in to the application');
+        }
+
+        $redirectUrl = $user && $user->hasRole('super-admin') ? route('admin.dashboard') : '/';
+        
+        return $request->wantsJson()
+            ? response()->json(['two_factor' => false])
+            : redirect()->intended($redirectUrl);
     }
 }
