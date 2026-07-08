@@ -1,7 +1,7 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
     "name": "islamikit/starterkit",
-    "description": "Laravel 13 starterkit with Inertia Vue 3, Fortify, Spatie",
+    "description": "A Laravel 13 starter kit powered by Inertia.js, Vue 3, Fortify, and Spatie packages.",
     "type": "library",
     "license": "MIT",
     "keywords": ["laravel", "inertiajs", "vue3", "starter-kit", "admin-panel"],
